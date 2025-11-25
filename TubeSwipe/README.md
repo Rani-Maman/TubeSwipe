@@ -6,6 +6,8 @@
 
 A swipe-based YouTube video discovery application for efficiently browsing and organizing videos from your subscriptions.
 
+<img width="496" height="911" alt="image" src="https://github.com/user-attachments/assets/8986d723-888b-429d-8741-0d8094d2b7f3" />
+
 ## Overview
 
 TubeSwipe provides a swiping-style interface for managing YouTube content, allowing users to quickly swipe through their subscription feed and organize videos into playlists. The app integrates AI-powered summaries and provides an intuitive keyboard-driven workflow.
