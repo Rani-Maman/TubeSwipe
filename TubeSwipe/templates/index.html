@@ -1,0 +1,1613 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TubeSwipe</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #ff0000;
+            --success: #4caf50;
+            --danger: #ff4b4b;
+            --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            --card-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-gradient);
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 420px;
+            height: 100%;
+            max-height: 850px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .header {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 15px 10px;
+            margin-bottom: 15px;
+            gap: 15px;
+        }
+
+        .logo {
+            font-weight: 800;
+            font-size: 24px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: -0.5px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .logo:hover {
+            opacity: 0.8;
+        }
+
+        .logo i {
+            color: var(--primary);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .help-icon {
+            color: #999;
+            cursor: help;
+            font-size: 18px;
+            transition: color 0.2s;
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .help-icon:hover {
+            color: var(--primary);
+        }
+
+        .tooltip {
+            visibility: hidden;
+            background-color: rgba(30, 30, 30, 0.95);
+            color: #fff;
+            text-align: left;
+            border-radius: 8px;
+            padding: 12px;
+            position: absolute;
+            z-index: 100;
+            top: 30px;
+            right: -10px;
+            width: 180px;
+            font-size: 12px;
+            font-weight: 500;
+            opacity: 0;
+            transition: opacity 0.2s, transform 0.2s;
+            transform: translateY(5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            pointer-events: none;
+            line-height: 1.6;
+        }
+
+        .help-icon:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .logout-link {
+            color: #666;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+
+        .logout-link:hover {
+            color: var(--danger);
+        }
+
+        .card-stack {
+            flex: 1;
+            position: relative;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            perspective: 1000px;
+        }
+
+        .card {
+            position: absolute;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            max-height: 620px;
+            background: white;
+            border-radius: 24px;
+            box-shadow: var(--card-shadow);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            transform-origin: center bottom;
+            z-index: 2;
+        }
+
+        /* Video Container */
+        .video-wrapper {
+            position: relative;
+            width: 100%;
+            padding-top: 56.25%;
+            /* 16:9 Aspect Ratio */
+            background: #000;
+        }
+
+        .video-wrapper iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .info {
+            padding: 24px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            background: white;
+        }
+
+        .title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+
+        .channel-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .channel {
+            font-size: 14px;
+            font-weight: 600;
+            color: #555;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .channel i {
+            color: #cc0000;
+        }
+
+        .mute-btn {
+            background: none;
+            border: none;
+            color: #999;
+            cursor: pointer;
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: all 0.2s;
+            margin-left: 8px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .mute-btn:hover {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .date {
+            font-size: 12px;
+            color: #999;
+            font-weight: 500;
+        }
+
+        /* Summary Section */
+        .summary-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            align-self: center;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 10px rgba(118, 75, 162, 0.3);
+        }
+
+        .summary-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(118, 75, 162, 0.4);
+        }
+
+        .summary-box {
+            background: #f8f9fa;
+            border-left: 4px solid #764ba2;
+            padding: 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #444;
+            display: none;
+            animation: fadeIn 0.4s ease;
+            margin-top: 15px;
+        }
+
+        .summary-box ul {
+            margin: 0;
+            padding-left: 20px;
+            list-style-type: disc;
+        }
+
+        .summary-box li {
+            margin-bottom: 8px;
+        }
+
+        .summary-box li:last-child {
+            margin-bottom: 0;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            padding: 20px 0;
+            width: 100%;
+            margin-top: auto;
+        }
+
+        .control-btn {
+            padding: 12px 24px;
+            border-radius: 12px;
+            border: 1px solid #eee;
+            background: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .control-btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-skip {
+            color: #666;
+            background: white;
+        }
+
+        .btn-skip:hover {
+            color: var(--danger);
+            background: #fff5f5;
+            border-color: #fed7d7;
+        }
+
+        .btn-save {
+            color: white;
+            background: var(--primary);
+            border: 1px solid var(--primary);
+        }
+
+        .btn-save:hover {
+            background: #d00000;
+        }
+
+        .btn-undo {
+            color: #666;
+            padding: 12px;
+            aspect-ratio: 1;
+        }
+
+        .btn-undo:hover {
+            color: #333;
+            background: #f8f9fa;
+        }
+
+        /* Animations */
+        .swipe-left {
+            animation: swipeLeft 0.5s forwards cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        .swipe-right {
+            animation: swipeRight 0.5s forwards cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        @keyframes swipeLeft {
+            to {
+                transform: translateX(-150%) rotate(-20deg);
+                opacity: 0;
+            }
+        }
+
+        @keyframes swipeRight {
+            to {
+                transform: translateX(150%) rotate(20deg);
+                opacity: 0;
+            }
+        }
+
+        /* Login Screen */
+        .login-container {
+            text-align: center;
+            padding: 50px;
+            background: white;
+            border-radius: 24px;
+            box-shadow: var(--card-shadow);
+            max-width: 350px;
+            width: 90%;
+        }
+
+        .login-title {
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .login-subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        .login-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 16px 32px;
+            background: #db4437;
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 700;
+            transition: all 0.2s;
+            box-shadow: 0 4px 15px rgba(219, 68, 55, 0.3);
+        }
+
+        .login-btn:hover {
+            background: #c53929;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(219, 68, 55, 0.4);
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #666;
+            margin-top: 150px;
+            font-weight: 500;
+        }
+
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 150px auto 20px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .saved-badge {
+            display: inline-flex;
+            align-self: flex-start;
+            background: #d1fae5;
+            color: #065f46;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 12px;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 12px;
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            cursor: help;
+        }
+
+        .saved-badge:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .saved-badge .tooltip {
+            right: auto;
+            left: 0;
+            top: 100%;
+            margin-top: 8px;
+            width: max-content;
+            max-width: 250px;
+            background-color: #1e1e1e;
+            z-index: 9999;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        @keyframes popIn {
+            from {
+                transform: scale(0);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .toggle-switch input {
+            display: none;
+        }
+
+        .slider {
+            width: 36px;
+            height: 20px;
+            background-color: #ccc;
+            border-radius: 20px;
+            position: relative;
+            transition: 0.3s;
+        }
+
+        .slider:before {
+            content: "";
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: white;
+            top: 2px;
+            left: 2px;
+            transition: 0.3s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        input:checked+.slider {
+            background-color: var(--primary);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(16px);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal {
+            background: white;
+            width: 90%;
+            max-width: 400px;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .muted-list {
+            overflow-y: auto;
+            flex: 1;
+            max-height: 60vh;
+            /* Ensure scrollbar appears */
+        }
+
+        .muted-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .muted-name {
+            font-weight: 600;
+            color: #555;
+            font-size: 14px;
+        }
+
+        .unmute-btn {
+            background: #edf2f7;
+            color: #4a5568;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .unmute-btn:hover {
+            background: #e2e8f0;
+            color: #2d3748;
+        }
+
+        .empty-muted {
+            text-align: center;
+            color: #999;
+            padding: 20px;
+            font-size: 14px;
+        }
+
+        /* Playlist Settings */
+        .playlist-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+        }
+
+        .playlist-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .playlist-item:hover {
+            background: #f9f9f9;
+        }
+
+        .playlist-item.selected {
+            border-color: var(--primary);
+            background: #fff5f5;
+            position: relative;
+        }
+
+        .playlist-item.selected::after {
+            content: '\f00c';
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+            color: var(--primary);
+            margin-left: auto;
+        }
+
+        .playlist-thumb {
+            width: 40px;
+            height: 40px;
+            border-radius: 4px;
+            margin-right: 12px;
+            object-fit: cover;
+            background: #eee;
+        }
+
+        .playlist-info {
+            flex: 1;
+        }
+
+        .playlist-title {
+            font-weight: 600;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .playlist-privacy {
+            font-size: 11px;
+            color: #888;
+            text-transform: capitalize;
+        }
+
+        .new-playlist-form {
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .input-field {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .playlist-dropdown {
+            position: relative;
+        }
+
+        .playlist-btn {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #555;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+            max-width: 180px;
+        }
+
+        .playlist-btn span {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            min-width: 0;
+        }
+
+        .playlist-btn i {
+            flex-shrink: 0;
+        }
+
+        .playlist-btn:hover {
+            background: #f5f5f5;
+            border-color: #ccc;
+        }
+
+        .playlist-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 8px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            width: 220px;
+            z-index: 100;
+            display: none;
+            overflow: hidden;
+            border: 1px solid #eee;
+        }
+
+        .playlist-menu.show {
+            display: block;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .menu-header {
+            padding: 10px 15px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #999;
+            text-transform: uppercase;
+            border-bottom: 1px solid #eee;
+            background: #fcfcfc;
+        }
+
+        .menu-list {
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        .menu-item {
+            padding: 10px 15px;
+            font-size: 13px;
+            color: #333;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background 0.2s;
+        }
+
+        .menu-item:hover {
+            background: #f5f7fa;
+        }
+
+        .menu-item.active {
+            color: var(--primary);
+            background: #fff5f5;
+            font-weight: 600;
+        }
+
+        .menu-item i {
+            font-size: 12px;
+            color: #ccc;
+        }
+
+        .menu-item.active i {
+            color: var(--primary);
+        }
+
+        .menu-footer {
+            padding: 10px;
+            border-top: 1px solid #eee;
+            background: #fcfcfc;
+        }
+
+        .create-btn {
+            width: 100%;
+            padding: 8px;
+            background: white;
+            border: 1px dashed #ccc;
+            border-radius: 6px;
+            color: #666;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .create-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: #fff5f5;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app-state" data-logged-in="{{ 'true' if logged_in else 'false' }}" style="display: none;"></div>
+
+    {% if not logged_in %}
+    <div class="login-container">
+        <div class="login-title">TubeSwipe</div>
+        <div class="login-subtitle">Discover and organize your YouTube subscriptions like never before.</div>
+        <a href="/login" class="login-btn">
+            <i class="fab fa-google"></i> Login with Google
+        </a>
+    </div>
+    {% else %}
+    <div class="app-container">
+        <div class="header">
+            <div class="logo" onclick="window.location.reload()">TubeSwipe</div>
+            <div class="header-actions">
+                <div class="playlist-dropdown">
+                    <button class="playlist-btn" onclick="togglePlaylistMenu()">
+                        <i class="fas fa-list"></i> <span id="currentPlaylistName">Saved</span> <i
+                            class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="playlist-menu" id="playlistMenu">
+                        <div class="menu-header">Save to...</div>
+                        <div class="menu-list" id="dropdownList">
+                            <div style="padding:15px; text-align:center; color:#999;">Loading...</div>
+                        </div>
+                        <div class="menu-footer">
+                            <button class="create-btn" onclick="openSettingsModal()">
+                                <i class="fas fa-plus"></i> New Playlist
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <label class="toggle-switch" title="Include Shorts">
+                    <input type="checkbox" id="shortsToggle" checked onchange="toggleShorts()">
+                    <span class="slider"></span>
+                    <span class="label-text">Shorts</span>
+                </label>
+                <div class="help-icon">
+                    <i class="fas fa-ban" onclick="openMutedModal()" style="cursor: pointer;"
+                        title="Manage Muted Channels"></i>
+                </div>
+                <div class="help-icon">
+                    <i class="far fa-question-circle"></i>
+                    <div class="tooltip" style="width: 200px;">
+                        <div
+                            style="margin-bottom: 5px; font-weight: 700; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 5px;">
+                            Controls</div>
+                        • <b>Right Arrow</b>: Save<br>
+                        • <b>Left Arrow</b>: Skip<br>
+                        • <b>Down Arrow</b>: Undo<br>
+                        <div style="margin-top: 5px; padding-top: 5px; border-top: 1px solid rgba(255,255,255,0.2);">
+                            • Select <b>Playlist</b> in header<br>
+                            • <b>Mute</b> to block channels<br>
+                            • Toggle <b>Shorts</b> on/off
+                        </div>
+                    </div>
+                </div>
+                <a href="/logout" class="logout-link">Logout</a>
+            </div>
+        </div>
+
+        <div class="card-stack" id="cardContainer">
+            <div style="text-align: center;">
+                <div class="loading-spinner"></div>
+                <p>Loading your feed...</p>
+            </div>
+        </div>
+
+        <div class="controls" id="controls" style="display: none;">
+            <button class="control-btn btn-skip" onclick="handleSwipe('skip')" title="Skip">
+                <i class="fas fa-times"></i> Skip
+            </button>
+            <button class="control-btn btn-undo" onclick="handleUndo()" title="Undo">
+                <i class="fas fa-undo"></i>
+            </button>
+            <button class="control-btn btn-save" onclick="handleSwipe('save')" title="Save to Playlist">
+                <i class="fas fa-heart"></i> Save
+            </button>
+        </div>
+    </div>
+    {% endif %}
+
+
+
+    <div id="mutedModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">Muted Channels</div>
+                <button class="close-modal" onclick="closeMutedModal()">&times;</button>
+            </div>
+            <div class="muted-list" id="mutedList">
+                <!-- Items will be injected here -->
+            </div>
+        </div>
+    </div>
+
+    <div id="settingsModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">Settings</div>
+                <button class="close-modal" onclick="closeSettingsModal()">&times;</button>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <h3 style="font-size: 14px; margin-bottom: 10px; color: #555;">Target Playlist</h3>
+                <div class="playlist-list" id="playlistList">
+                    <div style="text-align:center; padding:20px;"><i class="fas fa-spinner fa-spin"></i> Loading...
+                    </div>
+                </div>
+
+                <div class="new-playlist-form">
+                    <input type="text" id="newPlaylistTitle" placeholder="New Playlist Name" class="input-field">
+                    <select id="newPlaylistPrivacy" class="input-field" style="flex: 0 0 100px;">
+                        <option value="private">Private</option>
+                        <option value="public">Public</option>
+                        <option value="unlisted">Unlisted</option>
+                    </select>
+                    <button onclick="createNewPlaylist()" class="btn-primary">Create</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let videos = [];
+        let currentIndex = 0;
+
+        // Initialize toggle from localStorage
+        const savedShorts = localStorage.getItem('includeShorts');
+        if (savedShorts !== null) {
+            const toggle = document.getElementById('shortsToggle');
+            if (toggle) toggle.checked = (savedShorts === 'true');
+        }
+
+        function toggleShorts() {
+            const includeShorts = document.getElementById('shortsToggle').checked;
+            localStorage.setItem('includeShorts', includeShorts);
+
+            // Reset feed UI
+            document.getElementById('cardContainer').innerHTML = '<div style="text-align: center;"><div class="loading-spinner"></div><p>Curating your feed...</p></div>';
+            document.getElementById('controls').style.display = 'none';
+            currentIndex = 0;
+            videos = [];
+
+            loadFeed();
+        }
+
+        async function loadFeed() {
+            const includeShorts = document.getElementById('shortsToggle') ? document.getElementById('shortsToggle').checked : true;
+            const playlistId = localStorage.getItem('targetPlaylistId') || '';
+            const response = await fetch(`/api/feed?include_shorts=${includeShorts}&playlist_id=${playlistId}`);
+            if (response.status === 401) {
+                window.location.href = '/login';
+                return;
+            }
+            videos = await response.json();
+            if (videos.length === 0) {
+                document.getElementById('cardContainer').innerHTML = '<div class="empty-state"><i class="fas fa-film" style="font-size: 48px; margin-bottom: 20px; color: #ddd;"></i><br>No videos found!<br><small>Try enabling Shorts if disabled.</small></div>';
+                return;
+            }
+            renderCard();
+            document.getElementById('controls').style.display = 'flex';
+        }
+
+        function updateSaveButtonState() {
+            if (videos.length === 0 || currentIndex >= videos.length) return;
+
+            const video = videos[currentIndex];
+            const saveBtn = document.querySelector('.btn-save');
+
+            if (saveBtn) {
+                const targetPlaylistId = localStorage.getItem('targetPlaylistId');
+                let alreadyInTarget = false;
+
+                if (targetPlaylistId) {
+                    alreadyInTarget = video.saved_in && video.saved_in.some(p => p.id === targetPlaylistId);
+                } else {
+                    alreadyInTarget = video.saved_in && video.saved_in.some(p => p.title === "TubeSwipe Saved");
+                }
+
+                if (alreadyInTarget) {
+                    saveBtn.style.opacity = '0.5';
+                    saveBtn.style.cursor = 'default';
+                    saveBtn.title = "Already Saved to this playlist";
+                } else {
+                    saveBtn.style.opacity = '1';
+                    saveBtn.style.cursor = 'pointer';
+                    saveBtn.title = "Save to Playlist";
+                }
+            }
+        }
+
+        function renderCard() {
+            const container = document.getElementById('cardContainer');
+            if (currentIndex >= videos.length) {
+                container.innerHTML = '<div class="empty-state"><i class="fas fa-check-circle" style="font-size: 48px; margin-bottom: 20px; color: #4caf50;"></i><br>You\'re all caught up!</div>';
+                document.getElementById('controls').style.display = 'none';
+                return;
+            }
+
+            const video = videos[currentIndex];
+
+            let savedBadge = '';
+            if (video.is_saved) {
+                let playlistContent = "";
+                if (video.saved_in && video.saved_in.length > 0) {
+                    playlistContent = video.saved_in.map(p => `<div>• ${p.title}</div>`).join('');
+                } else {
+                    playlistContent = "<div>• Saved</div>";
+                }
+
+                savedBadge = `
+                    <div class="saved-badge">
+                        <i class="fas fa-check"></i> Saved
+                        <div class="tooltip">
+                            <div style="margin-bottom: 5px; font-weight: 700; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 5px;">Saved to</div>
+                            ${playlistContent}
+                        </div>
+                    </div>`;
+            }
+
+            // Check for cached summary
+            const hasSummary = !!video.summary;
+            const summaryDisplay = hasSummary ? 'block' : 'none';
+            const summaryText = hasSummary ? video.summary : '<i class="fas fa-spinner fa-spin"></i> Generating summary...';
+            const btnState = hasSummary ? 'disabled style="opacity: 0.7; cursor: default;"' : '';
+
+            container.innerHTML = `
+                <div class="card">
+                    <div class="video-wrapper">
+                        <iframe src="https://www.youtube.com/embed/${video.video_id}" allowfullscreen></iframe>
+                    </div>
+                    <div class="info">
+                        ${savedBadge}
+                        <div class="title">${video.title}</div>
+                        <div class="channel-row">
+                            <div class="channel">
+                                <i class="fas fa-user-circle"></i> ${video.channel_title}
+                                <button class="mute-btn" onclick="muteChannel('${video.channel_id}', '${video.channel_title.replace(/'/g, "\\'")}')" title="Mute this channel">
+                                    <i class="fas fa-ban"></i> Mute
+                                </button>
+                            </div>
+                            <div class="date">${new Date(video.published_at).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' })}</div>
+                        </div>
+                        
+                        <button class="summary-btn" onclick="fetchSummary('${video.video_id}', this)" ${btnState}>
+                            <i class="fas fa-magic"></i> AI Summary
+                        </button>
+                        <div id="summary-${video.video_id}" class="summary-box" style="display: ${summaryDisplay}">
+                            ${summaryText}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            updateSaveButtonState();
+            initSwipeGestures();
+        }
+
+        // Swipe Gestures
+        let isDragging = false;
+        let startX = 0;
+        let currentX = 0;
+        let activeCard = null;
+
+        function initSwipeGestures() {
+            activeCard = document.querySelector('.card');
+            if (!activeCard) return;
+
+            // Mouse
+            activeCard.addEventListener('mousedown', onDragStart);
+            // Touch
+            activeCard.addEventListener('touchstart', onDragStart, { passive: true });
+        }
+
+        function onDragStart(e) {
+            if (e.target.tagName === 'BUTTON' || e.target.closest('button') || e.target.tagName === 'IFRAME') return;
+
+            isDragging = true;
+            document.body.style.userSelect = 'none';
+            startX = getClientX(e);
+            currentX = startX;
+
+            activeCard.style.transition = 'none';
+
+            document.addEventListener('mousemove', onDragMove);
+            document.addEventListener('mouseup', onDragEnd);
+            document.addEventListener('touchmove', onDragMove, { passive: false });
+            document.addEventListener('touchend', onDragEnd);
+        }
+
+        function onDragMove(e) {
+            if (!isDragging || !activeCard) return;
+
+            currentX = getClientX(e);
+            const deltaX = currentX - startX;
+            const rotation = deltaX * 0.05;
+
+            activeCard.style.transform = `translateX(${deltaX}px) rotate(${rotation}deg)`;
+        }
+
+        function onDragEnd(e) {
+            if (!isDragging || !activeCard) return;
+            isDragging = false;
+            document.body.style.userSelect = '';
+
+            const deltaX = currentX - startX;
+            const threshold = 100;
+
+            activeCard.style.transition = 'transform 0.3s ease';
+
+            if (Math.abs(deltaX) > threshold) {
+                const direction = deltaX > 0 ? 1 : -1;
+                const endX = window.innerWidth * direction; // Move completely off screen
+
+                activeCard.style.transform = `translateX(${endX}px) rotate(${direction * 20}deg)`;
+
+                if (deltaX > 0) handleSwipe('save');
+                else handleSwipe('skip');
+            } else {
+                activeCard.style.transform = 'translateX(0) rotate(0)';
+            }
+
+            document.removeEventListener('mousemove', onDragMove);
+            document.removeEventListener('mouseup', onDragEnd);
+            document.removeEventListener('touchmove', onDragMove);
+            document.removeEventListener('touchend', onDragEnd);
+        }
+
+        function getClientX(e) {
+            return e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+        }
+
+        async function fetchSummary(videoId, btn) {
+            if (btn) {
+                btn.disabled = true;
+                btn.style.opacity = '0.7';
+                btn.style.cursor = 'default';
+            }
+
+            const box = document.getElementById(`summary-${videoId}`);
+            box.style.display = 'block';
+
+            try {
+                const res = await fetch(`/api/summary/${videoId}`);
+                const data = await res.json();
+                box.innerHTML = data.summary;
+
+                // Store summary in video object
+                const video = videos.find(v => v.video_id === videoId);
+                if (video) {
+                    video.summary = data.summary;
+                }
+            } catch (e) {
+                box.innerText = "Error fetching summary.";
+                if (btn) {
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                    btn.style.cursor = 'pointer';
+                }
+            }
+        }
+
+        async function muteChannel(channelId, channelTitle) {
+            if (!confirm(`Are you sure you want to mute ${channelTitle}? You won't see videos from this channel in your feed anymore.`)) {
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/mute', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ channel_id: channelId, channel_title: channelTitle })
+                });
+
+                if (res.ok) {
+                    // Animate card away like a skip
+                    handleSwipe('skip');
+                    // Optional: Show a toast message
+                } else {
+                    alert("Failed to mute channel.");
+                }
+            } catch (e) {
+                console.error("Error muting channel", e);
+            }
+        }
+
+        async function handleUndo() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                renderCard();
+            }
+        }
+
+        async function handleSwipe(action) {
+            const card = document.querySelector('.card');
+            if (!card) return;
+
+            const video = videos[currentIndex];
+            const targetPlaylistId = localStorage.getItem('targetPlaylistId');
+
+            // Prevent saving twice ONLY if it's already in the SPECIFIC target playlist
+            if (action === 'save') {
+                let alreadyInTarget = false;
+
+                if (targetPlaylistId) {
+                    // Check by ID
+                    alreadyInTarget = video.saved_in && video.saved_in.some(p => p.id === targetPlaylistId);
+                } else {
+                    // Fallback: Check for default "TubeSwipe Saved" by title if no ID set
+                    alreadyInTarget = video.saved_in && video.saved_in.some(p => p.title === "TubeSwipe Saved");
+                }
+
+                if (alreadyInTarget) {
+                    // Just animate but don't call API
+                    card.classList.add('swipe-right');
+                    await new Promise(r => setTimeout(r, 300));
+                    currentIndex++;
+                    renderCard();
+                    return;
+                }
+            }
+
+            // Add animation class
+            if (action === 'skip') card.classList.add('swipe-left');
+            else if (action === 'save') card.classList.add('swipe-right');
+
+
+            // Wait for animation
+            await new Promise(r => setTimeout(r, 300));
+
+            // Update index
+            currentIndex++;
+            renderCard();
+
+            try {
+                if (action === 'save') {
+                    // Mark as saved locally so if we undo, it shows as saved
+                    video.is_saved = true;
+
+                    // Update saved_in locally for tooltip
+                    if (!video.saved_in) video.saved_in = [];
+
+                    let currentPlaylistName = document.getElementById('currentPlaylistName').textContent;
+                    // If UI shows generic "Saved", map to the actual backend default name
+                    if (currentPlaylistName === 'Saved') currentPlaylistName = 'TubeSwipe Saved';
+
+                    const currentPlaylistId = localStorage.getItem('targetPlaylistId');
+
+                    const alreadyExists = video.saved_in.some(p =>
+                        (currentPlaylistId && p.id === currentPlaylistId) ||
+                        p.title === currentPlaylistName
+                    );
+
+                    if (!alreadyExists) {
+                        video.saved_in.push({
+                            id: currentPlaylistId,
+                            title: currentPlaylistName
+                        });
+                    }
+                }
+
+                await fetch('/api/swipe', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        video_id: video.video_id,
+                        action: action,
+                        playlist_id: localStorage.getItem('targetPlaylistId')
+                    })
+                });
+            } catch (e) {
+                console.error("Error swiping", e);
+            }
+        }
+
+        const isLoggedIn = document.getElementById('app-state').dataset.loggedIn === 'true';
+        if (isLoggedIn) {
+            loadFeed();
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (document.getElementById('controls').style.display === 'none') return;
+
+            if (e.key === 'ArrowLeft') handleSwipe('skip');
+            if (e.key === 'ArrowRight') handleSwipe('save');
+            if (e.key === 'Backspace' || e.key === 'ArrowDown') handleUndo();
+        });
+
+        // Muted channels modal
+        let mutedChangesMade = false;
+
+        async function openMutedModal() {
+            mutedChangesMade = false;
+            document.getElementById('mutedModal').style.display = 'flex';
+            const list = document.getElementById('mutedList');
+            list.innerHTML = '<div style="text-align:center; padding:20px;"><i class="fas fa-spinner fa-spin"></i> Loading...</div>';
+
+            try {
+                // Add timestamp to prevent caching
+                const res = await fetch(`/api/muted-channels?t=${new Date().getTime()}`);
+                if (!res.ok) throw new Error("Failed to fetch");
+
+                const channels = await res.json();
+
+                if (channels.length === 0) {
+                    list.innerHTML = '<div class="empty-muted">No muted channels.</div>';
+                    return;
+                }
+
+                list.innerHTML = channels.map(c => `
+                    <div class="muted-item" id="muted-${c.id}">
+                        <div class="muted-name">${c.name}</div>
+                        <button class="unmute-btn" onclick="unmuteChannel('${c.id}')">Unmute</button>
+                    </div>
+                `).join('');
+            } catch (e) {
+                console.error(e);
+                list.innerHTML = '<div class="empty-muted">Error loading channels.</div>';
+            }
+        }
+
+        function closeMutedModal() {
+            document.getElementById('mutedModal').style.display = 'none';
+            if (mutedChangesMade) {
+                window.location.reload();
+            }
+        }
+
+        async function unmuteChannel(channelId) {
+            try {
+                const res = await fetch('/api/unmute', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ channel_id: channelId })
+                });
+
+                if (res.ok) {
+                    // Remove from UI
+                    const item = document.getElementById(`muted-${channelId}`);
+                    if (item) item.remove();
+
+                    // If list empty, show empty state
+                    const list = document.getElementById('mutedList');
+                    if (list.children.length === 0) {
+                        list.innerHTML = '<div class="empty-muted">No muted channels.</div>';
+                    }
+
+                    mutedChangesMade = true;
+                } else {
+                    alert("Failed to unmute.");
+                }
+            } catch (e) {
+                console.error("Error unmuting", e);
+            }
+        }
+
+        // Close modal on outside click
+        document.getElementById('mutedModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('mutedModal')) {
+                closeMutedModal();
+            }
+        });
+
+        // Playlist Dropdown Logic
+        function togglePlaylistMenu() {
+            const menu = document.getElementById('playlistMenu');
+            menu.classList.toggle('show');
+            if (menu.classList.contains('show')) {
+                loadPlaylistDropdown();
+            }
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            const dropdown = document.querySelector('.playlist-dropdown');
+            if (dropdown && !dropdown.contains(e.target)) {
+                document.getElementById('playlistMenu').classList.remove('show');
+            }
+        });
+
+        async function loadPlaylistDropdown() {
+            const list = document.getElementById('dropdownList');
+            try {
+                // Use cached playlists if available to avoid delay, or fetch
+                if (userPlaylists.length === 0) {
+                    const res = await fetch('/api/playlists');
+                    if (!res.ok) throw new Error("Failed to fetch playlists");
+                    userPlaylists = await res.json();
+                }
+
+                renderPlaylistDropdown();
+            } catch (e) {
+                console.error(e);
+                list.innerHTML = '<div style="padding:10px; text-align:center; color:#999;">Error loading</div>';
+            }
+        }
+
+        function getPrivacyIcon(privacy) {
+            if (privacy === 'public') return '<i class="fas fa-globe" title="Public" style="font-size: 10px; color: #888;"></i>';
+            if (privacy === 'unlisted') return '<i class="fas fa-link" title="Unlisted" style="font-size: 10px; color: #888;"></i>';
+            return '<i class="fas fa-lock" title="Private" style="font-size: 10px; color: #888;"></i>';
+        }
+
+        function renderPlaylistDropdown() {
+            const list = document.getElementById('dropdownList');
+            const currentId = localStorage.getItem('targetPlaylistId');
+
+            // Update the button text
+            const currentPlaylist = userPlaylists.find(p => p.id === currentId);
+            const nameSpan = document.getElementById('currentPlaylistName');
+            if (nameSpan) {
+                nameSpan.textContent = currentPlaylist ? currentPlaylist.title : 'Saved';
+            }
+
+            if (userPlaylists.length === 0) {
+                list.innerHTML = '<div style="padding:10px; text-align:center; color:#999;">No playlists</div>';
+                return;
+            }
+
+            list.innerHTML = userPlaylists.map(p => `
+                <div class="menu-item ${p.id === currentId ? 'active' : ''}" onclick="selectPlaylistFromDropdown('${p.id}', '${p.title.replace(/'/g, "\\'")}')">
+                    <i class="fas fa-list"></i>
+                    <div style="flex:1; display:flex; align-items:center; min-width:0; gap:6px;">
+                        <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${p.title}">
+                            ${p.title}
+                        </span>
+                        <span style="flex-shrink:0; display:flex;">
+                            ${getPrivacyIcon(p.privacy)}
+                        </span>
+                    </div>
+                    ${p.id === currentId ? '<i class="fas fa-check"></i>' : ''}
+                </div>
+            `).join('');
+        }
+
+        function selectPlaylistFromDropdown(id, title) {
+            localStorage.setItem('targetPlaylistId', id);
+            document.getElementById('currentPlaylistName').textContent = title;
+            document.getElementById('playlistMenu').classList.remove('show');
+            // Also update the settings list if it's open
+            renderPlaylists();
+            updateSaveButtonState();
+        }
+
+        // Initialize dropdown label on load
+        if (isLoggedIn) {
+            // Try to get playlists to set the label correctly
+            fetch('/api/playlists').then(res => res.json()).then(data => {
+                userPlaylists = data;
+                const currentId = localStorage.getItem('targetPlaylistId');
+                const currentPlaylist = userPlaylists.find(p => p.id === currentId);
+                const nameSpan = document.getElementById('currentPlaylistName');
+                if (nameSpan && currentPlaylist) {
+                    nameSpan.textContent = currentPlaylist.title;
+                }
+            }).catch(console.error);
+        }
+
+        // Settings & Playlists
+        let userPlaylists = [];
+
+        async function openSettingsModal() {
+            document.getElementById('settingsModal').style.display = 'flex';
+            loadPlaylists();
+        }
+
+        function closeSettingsModal() {
+            document.getElementById('settingsModal').style.display = 'none';
+        }
+
+        async function loadPlaylists() {
+            const list = document.getElementById('playlistList');
+            try {
+                const res = await fetch('/api/playlists');
+                if (!res.ok) throw new Error("Failed to fetch playlists");
+
+                userPlaylists = await res.json();
+                renderPlaylists();
+            } catch (e) {
+                console.error(e);
+                list.innerHTML = '<div class="empty-muted">Error loading playlists.</div>';
+            }
+        }
+
+        function renderPlaylists() {
+            const list = document.getElementById('playlistList');
+            const currentId = localStorage.getItem('targetPlaylistId');
+
+            if (userPlaylists.length === 0) {
+                list.innerHTML = '<div class="empty-muted">No playlists found.</div>';
+                return;
+            }
+
+            list.innerHTML = userPlaylists.map(p => `
+                <div class="playlist-item ${p.id === currentId ? 'selected' : ''}" onclick="selectPlaylist('${p.id}')">
+                    <img src="${p.thumbnail || 'https://via.placeholder.com/40'}" class="playlist-thumb" onerror="this.src='https://via.placeholder.com/40'">
+                    <div class="playlist-info">
+                        <div class="playlist-title">${p.title}</div>
+                        <div class="playlist-privacy">
+                            ${getPrivacyIcon(p.privacy)} ${p.privacy}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function selectPlaylist(id) {
+            localStorage.setItem('targetPlaylistId', id);
+            renderPlaylists();
+
+            // Sync dropdown UI
+            const currentPlaylist = userPlaylists.find(p => p.id === id);
+            const nameSpan = document.getElementById('currentPlaylistName');
+            if (nameSpan && currentPlaylist) {
+                nameSpan.textContent = currentPlaylist.title;
+            }
+            updateSaveButtonState();
+        }
+
+        async function createNewPlaylist() {
+            const titleInput = document.getElementById('newPlaylistTitle');
+            const privacyInput = document.getElementById('newPlaylistPrivacy');
+            const title = titleInput.value.trim();
+            const privacy = privacyInput.value;
+
+            if (!title) return;
+
+            try {
+                const res = await fetch('/api/playlists', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title: title, privacy: privacy })
+                });
+
+                if (res.ok) {
+                    const newPlaylist = await res.json();
+                    titleInput.value = '';
+                    // Refresh list and select new one
+                    await loadPlaylists();
+                    selectPlaylist(newPlaylist.id);
+                } else {
+                    alert("Failed to create playlist");
+                }
+            } catch (e) {
+                console.error(e);
+                alert("Error creating playlist");
+            }
+        }
+
+        // Close settings on outside click
+        document.getElementById('settingsModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('settingsModal')) {
+                closeSettingsModal();
+            }
+        });
+    </script>
+</body>
+
+</html>

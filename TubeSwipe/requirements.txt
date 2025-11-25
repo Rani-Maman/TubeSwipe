@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+google-auth-oauthlib
+google-api-python-client
+requests
+python-dotenv
+jinja2
+itsdangerous
+youtube-transcript-api
+openai
+pytest
+pytest-asyncio
+httpx
