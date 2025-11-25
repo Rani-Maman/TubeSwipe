@@ -6,7 +6,7 @@
 
 A swipe-based YouTube video discovery application for efficiently browsing and organizing videos from your subscriptions.
 
-<img width="496" height="911" alt="image" src="https://github.com/user-attachments/assets/8986d723-888b-429d-8741-0d8094d2b7f3" />
+<img width="646" height="904" alt="image" src="https://github.com/user-attachments/assets/f8ce851d-7897-4d91-9722-dbc1db7688ac" />
 
 ## Overview
 
