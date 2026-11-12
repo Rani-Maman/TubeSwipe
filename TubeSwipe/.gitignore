@@ -48,7 +48,11 @@ Thumbs.db
 # Logs
 *.log
 
+# Cache
+.cache/
+
 # React (if you re-add it later)
 node_modules/
 npm-debug.log*
 yarn-error.log*
+.env.*
